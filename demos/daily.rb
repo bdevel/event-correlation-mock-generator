@@ -26,7 +26,7 @@ end
 
 # Feed#in will push :wake into feed's activity log at 8:00am. Just once.
 feed.in(8.hours) do | f|
-  f.push(:take_nape)
+  f.push(:take_nap)
 end
 
 
