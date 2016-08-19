@@ -11,7 +11,8 @@ days_of_week = %w{monday tuesday wednesday thursday friday saturday sunday}.map(
 # A Feed is the log of a users daily activity.
 # The feed starts at time zero and progresses forward
 # and events are triggered by time or by other events.
-feed = Feed.new(:max_time => 356.days)# Specify how many days worth of data to generate
+feed = Feed.new(:max_time => 356.days)# Specify how many days worth of data to generate.
+
 
 # Feed#every will call repeated at specified interval.
 # Ruby's Range has been extended to do allow a random interval between a range.
@@ -20,8 +21,8 @@ feed.every(2..3.days) do | f|
 end
 
 # Feed#at will call the block every day at a certain hour of the day.
-feed.at(18..24.hours) do | f|
-  f.push(:wake)
+feed.at(19..24.hours) do | f|
+  f.push(:sleep)
 end
 
 # Feed#in will push :wake into feed's activity log at 8:00am. Just once.
@@ -175,3 +176,8 @@ feed.when(count_today(:headache) > 2)
 
 
 puts feed.to_csv
+
+# wake, 2010-01-01 12:12:00
+# breakfast, 2010-01-01 12:12:00
+# eggs, 2010-01-01 12:12:00
+

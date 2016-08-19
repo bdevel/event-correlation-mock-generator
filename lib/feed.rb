@@ -1,13 +1,46 @@
-require_relative 'triggered_event'
+require_relative 'timed_event'
 
-class Feed
+class CorrelatedEvents::Feed
+  attr_accessor :current_time, :queue
+  
+  def initialize()
+    @queue = []
+    @current_time = Time.new(0) # start at 0000-01-01 00:00:00
+  end
+  
+  def at(time_of_day, &block)
+    if !time_of_day.is_a?(Time)
+      raise "Cannot trigger timed event unless given exact date and time."
+    end
+    queue_event CorrelatedEvents::TimedEvent.new(self, time_of_day, &block)
+  end
+  
+  def play()
+    # Get the first timed event to fire
+    while e = @queue.shift # TODO: && @current_time < max_time
+      self.current_time = e.trigger_time
+      e.fire
+    end
+  end
+  
+  private
+  def queue_event(e)
+    #@queue.each.with_index do |e|
+      
+    #end
+    @queue.push(e)
+  end
+  
+end
+
+
+class CorrelatedEvents::XFeed
 
   def initialize()
     @subscribers = []
     @time = Time.new(0)
     @log = []
   end
-
 
   ########### Logging Functions #############
 

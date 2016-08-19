@@ -1,6 +1,6 @@
 
 # Return seconds
-class Fixnum  
+class Numeric
   def days; self * 24.hours; end
   def hours; self * 60.minutes; end
   def minutes; self * 60; end

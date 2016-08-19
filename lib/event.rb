@@ -1,18 +1,31 @@
 
-class TriggeredEvent
-  #attr_reader :feed, :trigger, :delay, :prob, :then, :pending
-  
-  def initialize(feed, &trigger_proc)
+class CorrelatedEvents::Event
+  attr_accessor :feed, :delay, :prob, :thens, :pending
+
+  def initialize(feed)
     @feed       = feed
-    @trigger    = trigger_proc
     @delay      = 0
     @prob       = 1.0
-    @then       = nil
-    @pending    = nil
+    @thens      = []
+    @pending    = []
   end
 
+  # calls all the blocks that werer pending
+  def fire
+    # TODO: fail if check prob
+    @thens.each do |t|
+      t.call(@feed)
+    end
+  end
+
+  # Tells if it's ready to be fired.
+  def ready?
+    
+  end
+  
+  # Pass in a block or a symbol, or use do block
   def then(effect=nil, &block)
-    @then = block || effect
+    @thens.push(effect || block)
     return self
   end
 
@@ -43,3 +56,4 @@ class TriggeredEvent
   end
   
 end
+
