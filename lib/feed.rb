@@ -1,34 +1,55 @@
 require_relative 'timed_event'
 
 class CorrelatedEvents::Feed
-  attr_accessor :current_time, :queue
+  class MaxTimeReached < Exception; end;
   
-  def initialize()
+  attr_accessor :current_time, :queue, :prefs
+
+  # Options:
+  #   start_time: defaults to 0000-01-01 00:00:00
+  #   max_current_time: when to stop play from running queued events
+  def initialize(**prefs)
+    @prefs = prefs
     @queue = []
-    @current_time = Time.new(0) # start at 0000-01-01 00:00:00
+    @current_time = prefs[:start_time] || Time.new(0) # start at 0000-01-01 00:00:00
   end
-  
-  def at(time_of_day, &block)
-    if !time_of_day.is_a?(Time)
+
+  # Shortcut helper to create a timed event and push into queue.
+  def at(date_time, &block)
+    if !date_time.respond_to?(:year)
       raise "Cannot trigger timed event unless given exact date and time."
     end
-    queue_event CorrelatedEvents::TimedEvent.new(self, time_of_day, &block)
+    
+    queue_event CorrelatedEvents::TimedEvent.new(self, date_time, &block)
   end
-  
+
+  def current_time=(new_time)
+    if @prefs[:max_current_time] && new_time > @prefs[:max_current_time]
+      raise MaxTimeReached.new("max time reached")
+    end
+    # New time is good. Lets continue.
+    @current_time = new_time
+  end
+
+  # Starts
   def play()
     # Get the first timed event to fire
-    while e = @queue.shift # TODO: && @current_time < max_time
-      self.current_time = e.trigger_time
+    while e = @queue.shift
+      begin
+        self.current_time = e.trigger_time
+      rescue MaxTimeReached
+        break
+      end
       e.fire
     end
   end
   
-  private
   def queue_event(e)
-    #@queue.each.with_index do |e|
-      
-    #end
-    @queue.push(e)
+    if !e.respond_to?(:trigger_time)
+      raise "Cannot queue an object that doesn't have a trigger time."
+    end
+    # TODO, queue gets very large, this is not an optamized function.
+    @queue.push(e).sort_by!(&:trigger_time)
   end
   
 end

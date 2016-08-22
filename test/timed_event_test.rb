@@ -9,7 +9,7 @@ describe TimedEvent do
   end
 
   
-  it "has accepts a block for init and then" do
+  it "accepts a block for init and then" do
     ran_1 = false
     ran_2 = false
     b2    = lambda {|f| ran_2 = true}
@@ -28,5 +28,11 @@ describe TimedEvent do
     assert ran_2, "did not run block 2"
   end
 
+
+  describe "#ready?" do
+    it "do" do
+      
+    end
+  end
   
 end
