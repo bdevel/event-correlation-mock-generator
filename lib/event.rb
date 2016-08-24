@@ -8,6 +8,7 @@ class CorrelatedEvents::Event
     @prob       = 1.0
     @thens      = []
     @pending    = []
+    @did_fire   = false
   end
 
   # calls all the blocks that werer pending
@@ -15,9 +16,14 @@ class CorrelatedEvents::Event
     # TODO: fail if check prob
     @thens.each do |t|
       t.call(@feed)
+      #@did_fire = true
     end
   end
-
+  
+  #def did_fire?
+  #  @did_fire
+  #end
+  
   # Tells if it's ready to be fired.
   def ready?
     
@@ -25,7 +31,19 @@ class CorrelatedEvents::Event
   
   # Pass in a block or a symbol, or use do block
   def then(effect=nil, &block)
-    @thens.push(effect || block)
+    if block
+      @thens.push block
+    elsif effect.respond_to?(:call)
+      @thens.push effect
+    else
+      # push a new proc that that has the name of whatever
+      # object the effect is.. hopefully a symbol.
+      @thens.push lambda do |f|
+        @feed.record(effect)
+      end
+    end
+    
+    #@thens.push(effect || block)
     return self
   end
 
@@ -39,21 +57,22 @@ class CorrelatedEvents::Event
     return self
   end
 
-  def after(later_event)
-    @pending = Event.new(later_event)
-    return self
-  end
+  # TODO:
+  #def after(later_event)
+  #  @pending = Event.new(later_event)
+  #  return self
+  #end
   
-  def to_s()
-    # indent
-    p = @pending.to_s.split("\n").map{|s| "  #{s}"}.join("\n")
+  # def to_s()
+  #   # indent
+  #   p = @pending.to_s.split("\n").map{|s| "  #{s}"}.join("\n")
     
-    "When: #{@event.inspect} \n" +
-      "  Then:    #{@then.inspect} \n" +
-      "  Delay:   #{@delay.inspect} \n" +
-      "  Prob:    #{@prob.inspect}\n" +
-      "  Pending: #{p}\n"
-  end
+  #   "When: #{@.inspect} \n" +
+  #     "  Then:    #{@thens.inspect} \n" +
+  #     "  Delay:   #{@delay.inspect} \n" +
+  #     "  Prob:    #{@prob.inspect}\n" +
+  #     "  Pending: #{p}\n"
+  # end
   
 end
 

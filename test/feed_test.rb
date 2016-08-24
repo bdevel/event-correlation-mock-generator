@@ -5,7 +5,6 @@ describe CorrelatedEvents::Feed do
     @feed = CorrelatedEvents::Feed.new
   end
 
-
   it "takes start_time" do
     t = Time.now
     feed = Feed.new(start_time: t)
@@ -21,7 +20,19 @@ describe CorrelatedEvents::Feed do
     end
     
   end
+  
+  describe "#in" do
+    it "inserts TimedEvent into queue with current_time + interval" do
+      @feed.in(8.hours){}
+      assert_equal CorrelatedEvents::TimedEvent, @feed.queue.last.class
+      assert_equal (@feed.current_time + 8.hours), @feed.queue.last.trigger_time
+    end
+    
+  end
 
+
+  ###### EVENTS
+  
   def event_mock(ttime, *opt)
     out = Minitest::Mock.new
           .expect(:trigger_time, ttime)
@@ -76,10 +87,15 @@ describe CorrelatedEvents::Feed do
     assert_equal e2, @feed.queue[1]
   end
   
+
+
+  # TRIGGERS
+
   describe "#when" do
     it "must respond positively" do
     end
   end
+  
   
   # TODO:
   # It should update it's current_time to the next timed event's time trigger
