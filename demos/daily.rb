@@ -17,17 +17,17 @@ feed = Feed.new(:max_time => 356.days)# Specify how many days worth of data to g
 # Feed#every will call repeated at specified interval.
 # Ruby's Range has been extended to do allow a random interval between a range.
 feed.every(2..3.days) do | f|
-  f.push(:eat_bread)
+  f.record(:eat_bread)
 end
 
 # Feed#at will call the block every day at a certain hour of the day.
 feed.at(19..24.hours) do | f|
-  f.push(:sleep)
+  f.record(:sleep)
 end
 
 # Feed#in will push :wake into feed's activity log at 8:00am. Just once.
 feed.in(8.hours) do | f|
-  f.push(:take_nap)
+  f.record(:take_nap)
 end
 
 
@@ -107,7 +107,7 @@ feed.when(:breakfast)
 
 feed.when(:breakfast)
   .then do |f|# allow passing blocks
-      f.push breakfast_foods.random()
+      f.record breakfast_foods.random()
     end
     .prob(0.8)
     .delay(10..30.minutes)

@@ -3,7 +3,7 @@ require 'ostruct'
 class CorrelatedEvents::Feed
   class LogItem < OpenStruct
     
-    def initialize(name, timestamp, properties)
+    def initialize(timestamp, name, properties)
       super({
               name: name,
               timestamp: timestamp

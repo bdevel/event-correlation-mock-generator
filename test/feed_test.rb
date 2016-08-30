@@ -5,32 +5,15 @@ describe CorrelatedEvents::Feed do
     @feed = CorrelatedEvents::Feed.new
   end
 
-  it "takes start_time" do
-    t = Time.now
-    feed = Feed.new(start_time: t)
-    assert_equal t, feed.current_time
+
+  describe "initialization" do
+    it "takes start_time" do
+      t = Time.now
+      feed = Feed.new(start_time: t)
+      assert_equal t, feed.current_time
+    end
   end
   
-  describe "#at" do
-    it "inserts TimedEvent into queue" do
-      b = Proc.new{"do nothing"}
-      @feed.at(@feed.current_time + 8.hours, &b)
-      assert_equal CorrelatedEvents::TimedEvent, @feed.queue.last.class
-      assert @feed.queue.last.thens.include?(b), "thens does not include given block"
-    end
-    
-  end
-  
-  describe "#in" do
-    it "inserts TimedEvent into queue with current_time + interval" do
-      @feed.in(8.hours){}
-      assert_equal CorrelatedEvents::TimedEvent, @feed.queue.last.class
-      assert_equal (@feed.current_time + 8.hours), @feed.queue.last.trigger_time
-    end
-    
-  end
-
-
   ###### EVENTS
   
   def event_mock(ttime, *opt)
@@ -73,23 +56,50 @@ describe CorrelatedEvents::Feed do
       end
       timed_event.verify
     end
+
+    it "will queue events in order" do
+      e1 = OpenStruct.new(trigger_time: 3.hours)
+      e2 = OpenStruct.new(trigger_time: 4.hours)
+      
+      @feed.queue_event e2
+      @feed.queue_event e1
+      assert_equal e1, @feed.queue[0]
+      assert_equal e2, @feed.queue[1]
+    end
     
   end
   
-  
-  it "will queue events in order" do
-    e1 = OpenStruct.new(trigger_time: 3.hours)
-    e2 = OpenStruct.new(trigger_time: 4.hours)
+
+  #############   TRIGGERS ####################
+
+  describe "#at" do
+    it "inserts TimedEvent into queue" do
+      b = Proc.new{"do nothing"}
+      @feed.at(@feed.current_time + 8.hours, &b)
+      assert_equal CorrelatedEvents::TimedEvent, @feed.queue.last.class
+      assert @feed.queue.last.thens.include?(b), "thens does not include given block"
+    end
     
-    @feed.queue_event e2
-    @feed.queue_event e1
-    assert_equal e1, @feed.queue[0]
-    assert_equal e2, @feed.queue[1]
+    it "updates current_time before firing" do
+      expected_time = @feed.current_time + 2.hours
+      actual_time = nil
+      @feed.at(expected_time) do |f|
+        actual_time = f.current_time
+      end
+      @feed.play()
+      assert_equal expected_time, actual_time
+    end
+
   end
   
-
-
-  # TRIGGERS
+  describe "#in" do
+    it "inserts TimedEvent into queue with current_time + interval" do
+      @feed.in(8.hours){}
+      assert_equal CorrelatedEvents::TimedEvent, @feed.queue.last.class
+      assert_equal (@feed.current_time + 8.hours), @feed.queue.last.trigger_time
+    end
+    
+  end
 
   describe "#when" do
     it "will push a subscriber" do
@@ -113,10 +123,23 @@ describe CorrelatedEvents::Feed do
 
   end
   
+  ####### Logging Tests ##########
   
-  # TODO:
-  # It should update it's current_time to the next timed event's time trigger
-  # before firing the event. 
+  describe "#record" do
+    it "will push into log" do
+      assert_equal 0, @feed.log.size
+      @feed.record(:foo)
+      assert_equal 1, @feed.log.size
+      assert @feed.log.last.is_a?(CorrelatedEvents::Feed::LogItem)
+    end
+    
+    it "will include properties" do
+      @feed.record(:bar, :is_good? => true)
+      assert @feed.log.last.is_good?
+    end
+
+  end
+  
   
 end
 
