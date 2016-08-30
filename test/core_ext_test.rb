@@ -1,4 +1,4 @@
-
+require_relative 'test_helpers'
 describe Range do
   # todo
 end

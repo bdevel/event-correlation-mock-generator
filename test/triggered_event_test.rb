@@ -7,7 +7,9 @@ describe TriggeredEvent do
 
   describe "#then" do
     it "returns itself" do
-      e = TriggeredEvent.new(:foo, @feed)
+      e = TriggeredEvent.new(@feed) do |f, new_event|
+        true
+      end
       assert_equal e.object_id, e.then(:bar).object_id
     end
     

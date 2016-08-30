@@ -101,6 +101,19 @@ describe CorrelatedEvents::Feed do
     
   end
 
+  
+  describe "#once" do
+    it "inserts subscriber and removes it after fire" do
+      fires = []
+      @feed.once(:foo).then() {|f| fires << f.log.last.name }
+      @feed.record(:baz)
+      @feed.record(:foo)
+      @feed.record(:foo)
+      assert_equal [:foo], fires
+      assert_equal 0, @feed.subscribers.size
+    end
+  end
+
   describe "#when" do
     it "will push a subscriber" do
       assert @feed.subscribers.size == 0, "Subscribers not empty"
