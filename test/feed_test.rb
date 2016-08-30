@@ -92,8 +92,25 @@ describe CorrelatedEvents::Feed do
   # TRIGGERS
 
   describe "#when" do
-    it "must respond positively" do
+    it "will push a subscriber" do
+      assert @feed.subscribers.size == 0, "Subscribers not empty"
+      @feed.when(:foo)
+      assert_equal CorrelatedEvents::TriggeredEvent, @feed.subscribers.last.class
     end
+    
+    it "will trigger for matches" do
+      @feed.when(:foo, :bar)
+      assert @feed.subscribers.last.trigger.call(nil, :foo), "did not match for foo"
+      assert @feed.subscribers.last.trigger.call(nil, :bar), "did not match for bar"
+    end
+
+    it "will take custom block" do
+      did_check = false
+      @feed.when(){|f, e| did_check = e == :yes}
+      @feed.subscribers.last.event_notification(:yes)
+      assert_equal true, did_check
+    end
+
   end
   
   

@@ -24,11 +24,6 @@ class CorrelatedEvents::Event
   #  @did_fire
   #end
   
-  # Tells if it's ready to be fired.
-  def ready?
-    
-  end
-  
   # Pass in a block or a symbol, or use do block
   def then(effect=nil, &block)
     if block

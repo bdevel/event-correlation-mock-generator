@@ -11,7 +11,8 @@ class CorrelatedEvents::Feed
   attr_accessor :current_time,# State of feed.
                 :queue, # Upcoming time events 
                 :log,# The history of recorded events.
-                :prefs # preference options
+                :prefs, # preference options
+                :subscribers # who is watching the feed for new events
 
   # Options:
   #   start_time: defaults to 0000-01-01 00:00:00
@@ -22,6 +23,12 @@ class CorrelatedEvents::Feed
     @subscribers  = [] #who wants to be notified of new events
     @current_time = prefs[:start_time] || Time.new(0) # start at 0000-01-01 00:00:00
     @log          = []
+
+    # if they passed in 24.hours, then set it to a real time
+    if @prefs[:max_current_time].is_a?(Numeric)
+      @prefs[:max_current_time] = @current_time + @prefs[:max_current_time]
+    end
+
   end
 
   # Starts
@@ -42,9 +49,7 @@ class CorrelatedEvents::Feed
   def record(name, **properties)
     new_entry = LogItem.new(name, current_time, **properties)
     @log.push(new_entry)
-    puts "new record"
     @subscribers.each do |s|
-      puts "subsriber #{s}"
       s.event_notification(new_entry)
     end
   end

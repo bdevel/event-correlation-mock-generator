@@ -16,6 +16,13 @@ class CorrelatedEvents::Feed
       queue_event CorrelatedEvents::TimedEvent.new(self, trigger_time, &block)
     end
 
+    # Shortcut to make repeating timed event. Note, this will trigger at the current_time
+    # plus what ever interval is specified. Use in combination with #at to set at a specific time of day.
+    def every(time_add, &block)
+      self.in(time_add, &block).then do |f|
+        f.every(time_add, &block)
+      end
+    end
     
     # Safely pushes a new event onto the queue.
     def queue_event(e)
@@ -24,6 +31,7 @@ class CorrelatedEvents::Feed
       end
       # TODO, queue gets very large, this is not an optamized function.
       @queue.push(e).sort_by!(&:trigger_time)
+      return e
     end
     
   end

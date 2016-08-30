@@ -28,11 +28,4 @@ describe TimedEvent do
     assert ran_2, "did not run block 2"
   end
 
-
-  describe "#ready?" do
-    it "do" do
-      
-    end
-  end
-  
 end

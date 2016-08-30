@@ -1,6 +1,6 @@
 require_relative '../lib/correlated_events'
 
-feed = CorrelatedEvents::Feed.new()
+feed = CorrelatedEvents::Feed.new(:max_current_time => 24.hours)
 
 puts "Feed at #{feed.current_time}"
 
@@ -14,16 +14,22 @@ feed.in(3.minutes) do |f|
 end
 
 
+feed.at(feed.current_time + 4.hours) do |f|
+  f.every(1.hour) do |f2|
+    puts "  Time is #{f2.current_time.strftime("%H:%M")}"
+  end
+end
+
+
 feed
   .when(:begining_of_log)
   .then do |f|
-  puts "#{f.log.last.name} was just logged."
+     puts "#{f.log.last.name} was just logged."
     f.record(:has_started_logging)
   end
 
-feed.record(:begining_of_log)
-puts feed.log.inspect
 
+feed.record(:begining_of_log)
 
 # starting at when???
 #feed.every(1.day) do |f|
