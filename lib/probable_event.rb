@@ -15,15 +15,17 @@ class CorrelatedEvents::ProbableEvent < CorrelatedEvents::Event
       super(*args, &block)
     else
       @on_failures.each do |e|
-        process_then(e)
+        e.fire
       end
     end
   end
-      
-  def on_failure(effect=nil, &block)
-    @on_failures.push(block || effect)
-    self
-  end
+    
+  # If fails probablity
+  def on_failure
+    e = Event.new(@feed)
+    @on_failures.push(e)
+    return e
+   end
 
 
 end

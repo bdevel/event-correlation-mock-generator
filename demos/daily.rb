@@ -20,49 +20,39 @@ feed.every(2..3.days)
   .when(:lunch).wait(10.minutes).then(:bread)
 
 # Feed#at will call the block every day at a certain hour of the day.
-feed.at(19..24.hours) do | f|
+feed.when(:wake).wait(16.hours).then do |f|
   f.record(:sleep)
 end
 
-# Feed#in will push :wake into feed's activity log at 8:00am. Just once.
-feed.in(8.hours) do | f|
-  f.record(:take_nap)
-end
-
+feed.when(:wake).wait(8.hours).then(:take_nap)
 
 
 # More basic examples:
 
 feed.when(:friday, :saturday)
+  .prob(0.3)
+  .when(:dinner)
   .then(:pizza)
-    .prob(0.3) # 
-    .delay(18..24.hours)# eat pizza for dinner
 
 feed.when(:wake)
+  .prob(0.8)
+  .wait(10..30.minutes)
   .then(:breakfast)
-    .prob(0.8)
-    .delay(10..30.minutes)
 
 
 feed.when(:breakfast)
-  .then(pick_random(breakfast_foods))
-    .prob(0.8)
-    .delay(10..30.minutes)
+  .prob(0.8)
+  .then pick_random(breakfast_foods)
 
 
 feed.when(:breakfast)
   .then do |f|# allow passing blocks
       f.record breakfast_foods.random()
     end
-    .prob(0.8)
-    .delay(10..30.minutes)
-
 
 # Implement Feed#every
 feed.every(28.days)
   .then(:period_start)
-  .delay(-2..2.days) # Default 100% probablity
-
 
 
 #### Long Chained events.
@@ -72,30 +62,20 @@ feed.when(:pizza)
   .wait(2..3.days)
   .when(:wake)
   .prob(0.90)
+  .wait(10.minutes)
   .then(:pimple)
 
 
 
-# Other events are not triggered by time but only when a trigger event or
-# pattern has been matched. This is implemented with Feed#when
-# Feed.when returns a TriggeredEvent.
-
-# Trigger event after cause that is reported in the morning after a couple days
-feed.when(:pizza)
-    .then(:pimple)
-      .delay(2..3.days)        # few days later..
-      .prob(0.7)               # 70% likely it will be reported
-      .after(:wake)            # Only fire after wake is triggered
-        .prob(0.8)             # 80% likely they will report it
-        .delay(15..40.minutes) # reported after making the bed
-
 # Make event where the failure to do an action will trigger
 # a negative side effect.
-feed.when(:wake)
+take_meds = feed.when(:wake)
+    .prob(0.9)# almost always takes meds    
+    .wait(15..40.minutes) # after their shower
     .then(:blood_pressure_meds)
-      .prob(0.9)# almost always takes meds
-      .delay(15..40.minutes) # after their shower
-      .on_failure # When the probablity failes to trigger, do the then
+
+
+take_meds.on_failure
         .then(:dizzy)
           .after(:lunch)
           .prob(0.9)
