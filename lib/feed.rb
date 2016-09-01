@@ -31,6 +31,9 @@ class CorrelatedEvents::Feed
 
   end
 
+
+  ###################################################
+
   # Starts
   def play()
     # Get the first timed event to fire
@@ -58,7 +61,6 @@ class CorrelatedEvents::Feed
   
   ###################################################
   ###################################################
-  ###################################################
   
   def current_time=(new_time)
     if @prefs[:max_current_time] && new_time > @prefs[:max_current_time]
@@ -69,6 +71,16 @@ class CorrelatedEvents::Feed
   end
 
 
+  ########### Triggers #############
+  
+  def once(*args, &block)
+    CorrelatedEvents::TriggerOnceEvent.new(self, *args, &block)
+  end
+  
+
+  def when(*args, &block)
+    CorrelatedEvents::TriggeredEvent.new(self, *args, &block)
+  end
   
   
 end
