@@ -16,9 +16,8 @@ feed = Feed.new(:max_time => 356.days)# Specify how many days worth of data to g
 
 # Feed#every will call repeated at specified interval.
 # Ruby's Range has been extended to do allow a random interval between a range.
-feed.every(2..3.days) do | f|
-  f.record(:eat_bread)
-end
+feed.every(2..3.days)
+  .when(:lunch).wait(10.minutes).then(:bread)
 
 # Feed#at will call the block every day at a certain hour of the day.
 feed.at(19..24.hours) do | f|
@@ -29,6 +28,52 @@ end
 feed.in(8.hours) do | f|
   f.record(:take_nap)
 end
+
+
+
+# More basic examples:
+
+feed.when(:friday, :saturday)
+  .then(:pizza)
+    .prob(0.3) # 
+    .delay(18..24.hours)# eat pizza for dinner
+
+feed.when(:wake)
+  .then(:breakfast)
+    .prob(0.8)
+    .delay(10..30.minutes)
+
+
+feed.when(:breakfast)
+  .then(pick_random(breakfast_foods))
+    .prob(0.8)
+    .delay(10..30.minutes)
+
+
+feed.when(:breakfast)
+  .then do |f|# allow passing blocks
+      f.record breakfast_foods.random()
+    end
+    .prob(0.8)
+    .delay(10..30.minutes)
+
+
+# Implement Feed#every
+feed.every(28.days)
+  .then(:period_start)
+  .delay(-2..2.days) # Default 100% probablity
+
+
+
+#### Long Chained events.
+
+
+feed.when(:pizza)
+  .wait(2..3.days)
+  .when(:wake)
+  .prob(0.90)
+  .then(:pimple)
+
 
 
 # Other events are not triggered by time but only when a trigger event or
@@ -43,7 +88,6 @@ feed.when(:pizza)
       .after(:wake)            # Only fire after wake is triggered
         .prob(0.8)             # 80% likely they will report it
         .delay(15..40.minutes) # reported after making the bed
-    
 
 # Make event where the failure to do an action will trigger
 # a negative side effect.
@@ -86,37 +130,9 @@ end
     .prob(0.7)
 
 
-# More basic examples:
-
-feed.when(:friday, :saturday)
-  .then(:pizza)
-    .prob(0.3) # 
-    .delay(18..24.hours)# eat pizza for dinner
-
-feed.when(:wake)
-  .then(:breakfast)
-    .prob(0.8)
-    .delay(10..30.minutes)
 
 
-feed.when(:breakfast)
-  .then(pick_random(breakfast_foods))
-    .prob(0.8)
-    .delay(10..30.minutes)
 
-
-feed.when(:breakfast)
-  .then do |f|# allow passing blocks
-      f.record breakfast_foods.random()
-    end
-    .prob(0.8)
-    .delay(10..30.minutes)
-
-
-# Implement Feed#every
-feed.every(28.days)
-  .then(:period_start)
-  .delay(-2..2.days) # Default 100% probablity
 
 
 # Allow combining blocks  .when

@@ -1,12 +1,13 @@
 require_relative 'timed_event'
+require_relative 'trigger_once_event'
+require_relative 'probable_event'
+require_relative 'delayed_event'
 require_relative 'feed_event_shortcuts'
-require_relative 'feed_trigger_shortcuts'
 require_relative 'log_item'
 
 class CorrelatedEvents::Feed
   class MaxTimeReached < Exception; end;
   include FeedEventShortcuts
-  include FeedTriggerShortcuts
   
   attr_accessor :current_time,# State of feed.
                 :queue, # Upcoming time events 
@@ -59,9 +60,6 @@ class CorrelatedEvents::Feed
     end
   end
   
-  ###################################################
-  ###################################################
-  
   def current_time=(new_time)
     if @prefs[:max_current_time] && new_time > @prefs[:max_current_time]
       raise MaxTimeReached.new("max time reached")
@@ -71,15 +69,29 @@ class CorrelatedEvents::Feed
   end
 
 
+  def subscribe(obj)
+    @subscribers.push(obj)
+    self
+  end
+
+  def unsubscribe(obj)
+    @subscribers.delete(obj)
+    self
+  end
+
+
   ########### Triggers #############
   
   def once(*args, &block)
-    CorrelatedEvents::TriggerOnceEvent.new(self, *args, &block)
-  end
-  
+    e = CorrelatedEvents::TriggerOnceEvent.new(self, *args, &block)
+    subscribe(e)
+    return e
+  end  
 
   def when(*args, &block)
-    CorrelatedEvents::TriggeredEvent.new(self, *args, &block)
+    e = CorrelatedEvents::TriggeredEvent.new(self, *args, &block)
+    subscribe(e)
+    return e
   end
   
   

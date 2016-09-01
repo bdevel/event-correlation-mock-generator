@@ -77,25 +77,23 @@ describe CorrelatedEvents::Feed do
       b = Proc.new{"do nothing"}
       @feed.at(@feed.current_time + 8.hours, &b)
       assert_equal CorrelatedEvents::TimedEvent, @feed.queue.last.class
-      assert @feed.queue.last.thens.include?(b), "thens does not include given block"
     end
     
     it "updates current_time before firing" do
       expected_time = @feed.current_time + 2.hours
       actual_time = nil
-      @feed.at(expected_time) do |f|
+      @feed.at(expected_time).then do |f|
         actual_time = f.current_time
       end
       @feed.play()
       assert_equal expected_time, actual_time
     end
-
   end
   
-  describe "#in" do
+  describe "#wait" do
     it "inserts TimedEvent into queue with current_time + interval" do
-      @feed.in(8.hours){}
-      assert_equal CorrelatedEvents::TimedEvent, @feed.queue.last.class
+      @feed.wait(8.hours){}
+      assert_equal CorrelatedEvents::DelayedEvent, @feed.queue.last.class
       assert_equal (@feed.current_time + 8.hours), @feed.queue.last.trigger_time
     end
     

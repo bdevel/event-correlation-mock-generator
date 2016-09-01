@@ -4,27 +4,28 @@ class CorrelatedEvents::Feed
 
     
     # Shortcut helper to create a timed event and push into queue.
-    def at(date_time, &block)
+    def at(date_time)
       if !date_time.respond_to?(:year)
         raise "Cannot trigger timed event unless given exact date and time."
       end
       
-      queue_event CorrelatedEvents::TimedEvent.new(self, date_time, &block)
+      e = CorrelatedEvents::TimedEvent.new(self, date_time)
+      queue_event e
     end
     
     # Shortcut to execute a block at the current_time plus an interval.
-    def in(time_add, &block)
-      trigger_time = @current_time + time_add
-      queue_event CorrelatedEvents::TimedEvent.new(self, trigger_time, &block)
+    def wait(time_add)
+      e = CorrelatedEvents::DelayedEvent.new(self, time_add)
+      queue_event e
     end
 
     # Shortcut to make repeating timed event. Note, this will fire at the current_time
     # plus what ever interval is specified. Use within an #at to
     # set at a specific time of day.
-    def every(time_add, &block)
-      self.in(time_add, &block).then do |f|
-        f.every(time_add, &block)
-      end
+    def every(time_add)
+      self.wait(time_add)
+        .then(&block)
+        .then {|f| f.every(time_add).then(&block) }
     end
     
     # Safely pushes a new event onto the queue.

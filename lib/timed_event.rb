@@ -7,10 +7,9 @@ class CorrelatedEvents::TimedEvent < CorrelatedEvents::Event
   
   attr_accessor :trigger_time
   
-  def initialize(feed, trigger_time, &then_block)
+  def initialize(feed, trigger_time)
     super(feed)
     @trigger_time = trigger_time
-    @thens.push(then_block) unless then_block.nil?
   end
   
   def <=>(other)

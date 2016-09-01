@@ -8,7 +8,6 @@ class CorrelatedEvents::TriggeredEvent < CorrelatedEvents::Event
   # Or, you can pass a block.
   def initialize(feed, *trigger_events, &block)
     super(feed)
-    #@trigger = block
 
     if block_given?
       @trigger = block
@@ -19,12 +18,14 @@ class CorrelatedEvents::TriggeredEvent < CorrelatedEvents::Event
       @trigger = Proc.new do |feed, new_event|
         trigger_events.any?{|t| new_event == t}
       end
+      
+      @trigger.define_singleton_method :name do
+        return trigger_events.inspect
+      end
     end
-
-    # Add self to the feed's subscribers
-    @feed.subscribers.push(self)
+    
   end
-
+  
   # Feed subscribers will get a notification
   # with this method. 
   def event_notification(new_entry)
