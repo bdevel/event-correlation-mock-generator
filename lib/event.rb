@@ -9,11 +9,16 @@ class CorrelatedEvents::Event
   
   # Pass in a block or a symbol, or use do block
   def then(*effects, &block)
-    @thens.push(block || effects)
+    if block_given?
+      @thens.push(block)
+    else
+      effects.each {|e| @thens.push(e) }
+    end
     return self
   end
 
   def wait(delay)
+    raise "#wait does not support supplying a block" if block_given?
     event = CorrelatedEvents::DelayedEvent.new(@feed, delay)
     self.then do |f|
       # only queue after fireing. But update to new time.
@@ -56,8 +61,8 @@ class CorrelatedEvents::Event
   def process_then(effect)
     if effect.respond_to?(:call)
       effect.call(@feed)
-    elsif effect.is_a?(Array)
-      effect.each {|e| process_then(e)}      
+    #elsif effect.is_a?(Array)
+    #  effect.each {|e| process_then(e)}      
     else
       @feed.record(effect)
     end

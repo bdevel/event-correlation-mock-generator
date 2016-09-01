@@ -5,6 +5,7 @@ class CorrelatedEvents::Feed
     
     # Shortcut helper to create a timed event and push into queue.
     def at(date_time)
+      raise "Feed#at does not support supplying a block" if block_given?
       if !date_time.respond_to?(:year)
         raise "Cannot trigger timed event unless given exact date and time."
       end
@@ -15,6 +16,7 @@ class CorrelatedEvents::Feed
     
     # Shortcut to execute a block at the current_time plus an interval.
     def wait(time_add)
+      raise "Feed#wait does not support supplying a block" if block_given?
       e = CorrelatedEvents::DelayedEvent.new(self, time_add)
       queue_event e
     end
@@ -23,6 +25,7 @@ class CorrelatedEvents::Feed
     # plus what ever interval is specified. Use within an #at to
     # set at a specific time of day.
     def every(time_add)
+      raise "Feed#every does not support supplying a block" if block_given?
       self.wait(time_add)
         .then(&block)
         .then {|f| f.every(time_add).then(&block) }

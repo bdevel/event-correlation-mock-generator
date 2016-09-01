@@ -75,7 +75,7 @@ describe CorrelatedEvents::Feed do
   describe "#at" do
     it "inserts TimedEvent into queue" do
       b = Proc.new{"do nothing"}
-      @feed.at(@feed.current_time + 8.hours, &b)
+      @feed.at(@feed.current_time + 8.hours).then(&b)
       assert_equal CorrelatedEvents::TimedEvent, @feed.queue.last.class
     end
     
@@ -92,7 +92,7 @@ describe CorrelatedEvents::Feed do
   
   describe "#wait" do
     it "inserts TimedEvent into queue with current_time + interval" do
-      @feed.wait(8.hours){}
+      @feed.wait(8.hours)
       assert_equal CorrelatedEvents::DelayedEvent, @feed.queue.last.class
       assert_equal (@feed.current_time + 8.hours), @feed.queue.last.trigger_time
     end

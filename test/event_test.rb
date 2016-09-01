@@ -58,9 +58,9 @@ describe Event do
 
     it "will run on_failures" do
       did_run = false
-      @event.prob(0.0).then.on_failure {did_run = true}
+      @event.prob(0.0).on_failure.then {did_run = true}
       @event.fire
-      assert did_run
+      assert did_run, "did not run failure block"
     end
   end
 
