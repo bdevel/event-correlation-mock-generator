@@ -16,5 +16,7 @@ class CorrelatedEvents::TimedEvent < CorrelatedEvents::Event
     self.trigger_time <=> other.trigger_time
   end
   
+  def fire
+
 end
 

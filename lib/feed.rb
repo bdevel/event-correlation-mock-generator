@@ -1,13 +1,8 @@
-require_relative 'timed_event'
-require_relative 'trigger_once_event'
-require_relative 'probable_event'
-require_relative 'delayed_event'
-require_relative 'feed_event_shortcuts'
 require_relative 'log_item'
 
 class CorrelatedEvents::Feed
   class MaxTimeReached < Exception; end;
-  include FeedEventShortcuts
+
   
   attr_accessor :current_time,# State of feed.
                 :queue, # Upcoming time events 
@@ -29,7 +24,6 @@ class CorrelatedEvents::Feed
     if @prefs[:max_current_time].is_a?(Numeric)
       @prefs[:max_current_time] = @current_time + @prefs[:max_current_time]
     end
-
   end
 
 
@@ -48,8 +42,7 @@ class CorrelatedEvents::Feed
       # Fire now!
       e.fire
     end
-  end
-  
+  end  
   
   # Put an entry onto the log
   def record(name, **properties)
@@ -78,22 +71,6 @@ class CorrelatedEvents::Feed
     @subscribers.delete(obj)
     self
   end
-
-
-  ########### Triggers #############
-  
-  def once(*args, &block)
-    e = CorrelatedEvents::TriggerOnceEvent.new(self, *args, &block)
-    subscribe(e)
-    return e
-  end  
-
-  def when(*args, &block)
-    e = CorrelatedEvents::TriggeredEvent.new(self, *args, &block)
-    subscribe(e)
-    return e
-  end
-  
-  
+    
 end
 
