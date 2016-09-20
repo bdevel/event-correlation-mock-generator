@@ -1,3 +1,4 @@
+require_relative 'blood_glucose_behavior'
 
 breakfast_foods = %w{cerial no_breakfast eggs smoothie pancakes fruit}.map(&:to_sym)
 lunch_foods     = %w{pasta indian falafel pizza}.map(&:to_sym)

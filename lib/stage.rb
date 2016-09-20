@@ -1,17 +1,17 @@
 require_relative 'log_item'
 
-class CorrelatedEvents::Feed
+class CorrelatedEvents::Stage
   class MaxTimeReached < Exception; end;
 
   
-  attr_accessor :current_time,# State of feed.
+  attr_accessor :current_time,
                 :queue, # Upcoming time events 
                 :log,# The history of recorded events.
                 :prefs, # preference options
-                :subscribers # who is watching the feed for new events
+                :subscribers # who is watching the stage for new events
 
   # Options:
-  #   start_time: defaults to 0000-01-01 00:00:00
+  #   start_time: defaults tdo 0000-01-01 00:00:00
   #   max_current_time: when to stop play from running queued events
   def initialize(**prefs)
     @prefs        = prefs

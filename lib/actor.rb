@@ -72,7 +72,6 @@ class CorrelatedEvents::Agent
     return e
   end
   
-  
 
   
   private
