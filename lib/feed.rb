@@ -6,8 +6,10 @@ require_relative 'feed_event_shortcuts'
 require_relative 'log_item'
 
 class CorrelatedEvents::Feed
-  class MaxTimeReached < Exception; end;
   include FeedEventShortcuts
+  
+  class MaxTimeReached < Exception; end;
+
   
   attr_accessor :current_time,# State of feed.
                 :queue, # Upcoming time events 
@@ -43,6 +45,7 @@ class CorrelatedEvents::Feed
         # Shift the current time to trigger time, then fire event
         self.current_time = e.trigger_time
       rescue MaxTimeReached
+        @queue.unshift e # put back in queue since we didn't run it
         break
       end
       # Fire now!
@@ -55,6 +58,8 @@ class CorrelatedEvents::Feed
   def record(name, **properties)
     new_entry = LogItem.new(current_time, name, **properties)
     @log.push(new_entry)
+    # todo, instead of notifying everyone, just use a hashmap
+    # so a subscriber can monitor a single channel name
     @subscribers.each do |s|
       s.event_notification(new_entry)
     end
@@ -62,6 +67,7 @@ class CorrelatedEvents::Feed
   
   def current_time=(new_time)
     if @prefs[:max_current_time] && new_time > @prefs[:max_current_time]
+      @current_time =  @prefs[:max_current_time]
       raise MaxTimeReached.new("max time reached")
     end
     # New time is good. Lets continue.

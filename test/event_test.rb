@@ -61,7 +61,7 @@ describe Event do
       @event.prob(0.0).on_failure.then {did_run = true}
       @event.fire
       assert did_run, "did not run failure block"
-    end
+     end
   end
 
   

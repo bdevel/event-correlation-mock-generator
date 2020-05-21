@@ -36,6 +36,7 @@ describe CorrelatedEvents::Feed do
 
       # should have updated to events trigger time
       assert_equal ttime, @feed.current_time
+      assert @feed.queue.empty?
       timed_event.verify
     end
     
@@ -54,6 +55,8 @@ describe CorrelatedEvents::Feed do
       rescue Exception => e
         assert_match /max.*time/i, e.to_s
       end
+      assert_equal max_time, @feed.current_time
+      assert_equal [timed_event], @feed.queue
       timed_event.verify
     end
 
@@ -141,7 +144,11 @@ describe CorrelatedEvents::Feed do
       assert_equal 0, @feed.log.size
       @feed.record(:foo)
       assert_equal 1, @feed.log.size
-      assert @feed.log.last.is_a?(CorrelatedEvents::Feed::LogItem)
+      
+      i = @feed.log.last
+      assert i.is_a?(CorrelatedEvents::Feed::LogItem)
+      assert_equal :foo, i.name
+      # assert_equal 3, i.timestamp
     end
     
     it "will include properties" do

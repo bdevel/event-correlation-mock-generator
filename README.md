@@ -1,6 +1,8 @@
 # Event Correlation Mock Data Generator
 Generates a dataset for use in determining event correlation.
 
-See `demos/daily.rb` to see syntax for chained events. 
+Also could be called an "agent simulator" as you can describe how an agent
+behaves during the day and reacts to certain events. Events can trigger
+other events.
 
-`core_ext.rb` is worth incorperating. 
+See `demos/daily.rb` to see syntax for chained events. 

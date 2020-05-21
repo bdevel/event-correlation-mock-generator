@@ -3,16 +3,18 @@ module CorrelatedEvents
 end
 
 class CorrelatedEvents::Agent
-#  behaviours Behaviours::EatsFood, Behaviours::WakesAndSleeps
-    def initialize()
-      puts "doing agent init"
-    end
+  #  behaviours Behaviours::EatsFood, Behaviours::WakesAndSleeps
+  def initialize()
+    puts "doing agent init"
+  end
 end
 
 class Person < CorrelatedEvents::Agent
   
   module BloodSugar
-    def self.activate(agent)
+    #def self.activate(agent)
+    def initialize()
+      console.log("blood sugar init");
       @blood_sugar = 100
 
       agent

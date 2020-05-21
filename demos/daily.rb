@@ -1,4 +1,7 @@
 
+require_relative '../lib/correlated_events'
+include CorrelatedEvents
+
 breakfast_foods = %w{cerial no_breakfast eggs smoothie pancakes fruit}.map(&:to_sym)
 lunch_foods     = %w{pasta indian falafel pizza}.map(&:to_sym)
 dinner_foods    = %w{pizza pasta no_dinner chinese }.map(&:to_sym)
@@ -11,7 +14,7 @@ days_of_week = %w{monday tuesday wednesday thursday friday saturday sunday}.map(
 # A Feed is the log of a users daily activity.
 # The feed starts at time zero and progresses forward
 # and events are triggered by time or by other events.
-feed = Feed.new(:max_time => 356.days)# Specify how many days worth of data to generate.
+feed = Feed.new(:max_current_time => 356.days)# Specify how many days worth of data to generate.
 
 
 # Feed#every will call repeated at specified interval.
@@ -51,8 +54,8 @@ feed.when(:breakfast)
     end
 
 # Implement Feed#every
-feed.every(28.days)
-  .then(:period_start)
+feed.every(3.days)
+  .then(:call_home)
 
 
 #### Long Chained events.
@@ -72,14 +75,11 @@ feed.when(:pizza)
 take_meds = feed.when(:wake)
     .prob(0.9)# almost always takes meds    
     .wait(15..40.minutes) # after their shower
-    .then(:blood_pressure_meds)
-
-
-take_meds.on_failure
-        .then(:dizzy)
-          .after(:lunch)
-          .prob(0.9)
-          .delay(45..90.minutes)
+    .then(:coffee)
+    .otherwise(:headache)
+    .prob(0.9)
+    .delay(45..90.minutes)
+    .after(:lunch)
 
       
 # Allow passing many triggers
@@ -124,9 +124,9 @@ night_time     = lambda {|f| f.time.hour > 18}
 
 # Please extend Proc to allow for bitise operators to act as logic operators.
 #                    OR              NOT           AND            AND
-feed.when(is_weekend | away_from_home ~ with_family & with_buddies & night_time)
-  .then(:alcohol)
-  .probability(0.8)
+# feed.when(is_weekend | away_from_home ~ with_family & with_buddies & night_time)
+#   .then(:alcohol)
+#   .probability(0.8)
 
 
 # Example, get a hang over in the morning
